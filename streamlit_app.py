@@ -501,12 +501,11 @@ st.sidebar.write("---")
 
 # 2. 거래 자산 설정
 st.sidebar.subheader("⚙️ 거래 자산 설정")
-adr_ticker_choice = st.sidebar.selectbox(
-    "미국 ADR 티커 선택",
-    ["SKHY", "HXSCF"],
-    index=0,
-    help="SKHY는 NASDAQ 공식 ADR 티커이며, HXSCF는 OTC(장외시장) 거래 티커입니다."
-)
+adr_ticker_choice = st.sidebar.text_input(
+    "미국 ADR 티커 입력",
+    value="SKHY",
+    help="NASDAQ 공식 ADR 티커인 SKHY를 기본으로 사용합니다. 야후 파이낸스에 등록된 유효한 티커만 연동됩니다."
+).upper()
 
 adr_ratio = st.sidebar.number_input(
     "ADR 전환 비율 (1주당 ADR 수량)",
