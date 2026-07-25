@@ -722,31 +722,57 @@ else:
     # 실시간 주도 시장 및 트렌드
     # ==========================================================================
     kst_now = m_status['kst_raw']
+    k_status = m_status['k_status']
+    u_status = m_status['u_status']
+    
+    # 기본값 설정
     recently_active = "한국 주식시장 (KRX)"
-    recently_active_status = "🟢 정규장 거래 중"
+    recently_active_status = "🔴 장마감"
     active_change_str = krx_pct_str
     active_change_val = krx_pct
     
-    if m_status['u_status'] == "정규장 진행 중":
+    if k_status == "정규장 진행 중":
+        recently_active = "한국 주식시장 (KRX)"
+        recently_active_status = "🟢 정규장 거래 중"
+        active_change_str = krx_pct_str
+        active_change_val = krx_pct
+    elif u_status == "정규장 진행 중":
         recently_active = "미국 주식시장 (NASDAQ)"
         recently_active_status = "🟢 정규장 거래 중"
         active_change_str = adr_pct_str
         active_change_val = adr_pct
-    elif m_status['u_status'] in ["프리마켓 진행 중", "애프터마켓 진행 중"]:
+    elif u_status in ["프리마켓 진행 중", "애프터마켓 진행 중"]:
         recently_active = "미국 주식시장 (NASDAQ)"
-        recently_active_status = f"🟡 {m_status['u_status']}"
+        recently_active_status = f"🟡 {u_status}"
         active_change_str = adr_pct_str
         active_change_val = adr_pct
-    elif m_status['k_status'] == "장마감" and m_status['u_status'] == "장마감":
-        # 두 시장 모두 마감 시, 더 늦게 마감한 미국 장을 기준
-        if 5 <= kst_now.hour < 9:
+    else:
+        # 양대 마켓 모두 닫혀 있는 경우 (평일 밤/새벽 혹은 주말)
+        # 한국시간 기준 주말(토, 일) 및 월요일 아침 9시 이전에는 가장 최근에 거래된 시장이 금요일 밤 미국 시장임.
+        k_weekday = kst_now.weekday() # 0=월, 5=토, 6=일
+        k_hour = kst_now.hour
+        
+        is_us_last = False
+        if k_weekday == 5: # 토요일
+            is_us_last = True
+        elif k_weekday == 6: # 일요일
+            is_us_last = True
+        elif k_weekday == 0: # 월요일
+            if k_hour < 9:
+                is_us_last = True
+        else: # 화~금요일
+            # 평일 오전 5시(미국 장마감) ~ 오전 9시(한국 개장) 사이에는 미국 장이 직전 장임.
+            if k_hour < 9:
+                is_us_last = True
+                
+        if is_us_last:
             recently_active = "미국 주식시장 (NASDAQ)"
-            recently_active_status = "🔴 거래 종료 (최근 활성)"
+            recently_active_status = "🔴 주말 휴장" if k_weekday in [5, 6] or (k_weekday == 0 and k_hour < 9) else "🔴 장마감 (최근 활성)"
             active_change_str = adr_pct_str
             active_change_val = adr_pct
         else:
             recently_active = "한국 주식시장 (KRX)"
-            recently_active_status = "🔴 거래 종료 (최근 활성)"
+            recently_active_status = "🔴 주말 휴장" if k_status == "주말 휴장" else "🔴 장마감 (최근 활성)"
             active_change_str = krx_pct_str
             active_change_val = krx_pct
 
