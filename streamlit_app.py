@@ -69,9 +69,16 @@ def inject_custom_css(is_dark):
         --radius: 10px;
     }}
     
-    /* Streamlit 기본 헤더 및 푸터 숨기기 */
-    header[data-testid="stHeader"], [data-testid="stToolbar"],
-    [data-testid="stDecoration"], [data-testid="stStatusWidget"], .stDeployButton {{
+    /* Streamlit 기본 헤더 투명화 및 우측 툴바/푸터 숨기기 */
+    header[data-testid="stHeader"] {{
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        height: 0px !important;
+        min-height: 0px !important;
+    }}
+    [data-testid="stToolbar"], [data-testid="stDecoration"], 
+    [data-testid="stStatusWidget"], .stDeployButton, footer {{
         display: none !important;
     }}
     
