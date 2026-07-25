@@ -75,6 +75,24 @@ def inject_custom_css(is_dark):
         display: none !important;
     }}
     
+    /* 사이드바 접혔을 때 열기 버튼(stSidebarCollapsedControl)이 헤더를 숨겨도 항상 화면 좌상단에 뜨도록 스타일 교정 */
+    div[data-testid="stSidebarCollapsedControl"] {{
+        display: flex !important;
+        position: fixed !important;
+        top: 12px !important;
+        left: 12px !important;
+        z-index: 999999 !important;
+        background-color: var(--card) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+        padding: 4px !important;
+    }}
+    /* 열기 버튼 아이콘 색상 교정 */
+    div[data-testid="stSidebarCollapsedControl"] button {{
+        color: var(--text) !important;
+    }}
+    
     /* 앱 전반 스타일 정의 */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"], .main, .block-container, section[data-testid="stMain"] {{
         background-color: var(--bg) !important;
