@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 if "theme" not in st.session_state:
-    st.session_state.theme = "dark"
+    st.session_state.theme = "light"
 
 def toggle_theme():
     st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
@@ -487,8 +487,7 @@ st.sidebar.markdown("""
 """, unsafe_allow_html=True)
 st.sidebar.write("")
 
-# 1. 한국투자증권 API Key 입력 및 세션 보관 (secrets.toml 자동 탐색 우선)
-st.sidebar.subheader("🔑 한국투자증권 API 설정 (낮 시간 실시간)")
+# 1. 한국투자증권 API Key 조회 (secrets.toml에서 비보이지 않게 로드)
 kis_app_key = ""
 kis_app_secret = ""
 try:
@@ -497,24 +496,7 @@ try:
 except Exception:
     pass
 
-with st.sidebar.expander("한국투자증권 OpenAPI 연동 설정", expanded=not (kis_app_key and kis_app_secret)):
-    st.markdown("""
-    <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.45;">
-        낮 시간대 한국 거래소 장중 딜레이 없는 주가를 가져오기 위해 한국투자증권 OpenAPI Key를 설정하세요.
-        설정하지 않을 시 yfinance(15분 지연)로 자동 백업됩니다.
-    </p>
-    """, unsafe_allow_html=True)
-    
-    kis_mode = st.selectbox("투자 구분", ["실전투자", "모의투자"], index=0)
-    input_key = st.text_input("App Key", value=kis_app_key, type="password", help="한국투자증권에서 발급받은 OpenAPI App Key")
-    input_secret = st.text_input("App Secret", value=kis_app_secret, type="password", help="한국투자증권에서 발급받은 OpenAPI App Secret")
-    
-    if input_key and input_secret:
-        kis_app_key = input_key
-        kis_app_secret = input_secret
-
-kis_url_base = "https://openapi.koreainvestment.com:9443" if kis_mode == "실전투자" else "https://openapivts.koreainvestment.com:29443"
-
+kis_url_base = "https://openapi.koreainvestment.com:9443"
 st.sidebar.write("---")
 
 # 2. 거래 자산 설정
@@ -939,43 +921,20 @@ else:
             max_premium = df_hist['Premium_Pct'].max()
             min_premium = df_hist['Premium_Pct'].min()
             
-            table_rows = f"""
-            <tr>
-                <td><b>평균 프리미엄 (Average Premium)</b></td>
-                <td><span class="badge badge-blue">{avg_premium:+.2f}%</span></td>
-                <td>조회 기간의 평균 괴리율입니다. 보통 장기적으로 0% 내외로 수렴합니다.</td>
-            </tr>
-            <tr>
-                <td><b>프리미엄 표준편차 (Volatility of Premium)</b></td>
-                <td>{std_premium:.2f}%</td>
-                <td>괴리율이 평균 대비 변동한 범위입니다. 높을수록 아비트리지(차익) 거래 진입/청산 기회가 잦음을 의미합니다.</td>
-            </tr>
-            <tr>
-                <td><b>최대 프리미엄 할증 (Max Overvaluation)</b></td>
-                <td><span class="badge badge-red">{max_premium:+.2f}%</span></td>
-                <td>ADR이 본주 대비 역사적으로 가장 높은 할증(비싸게) 거래되었던 시점입니다.</td>
-            </tr>
-            <tr>
-                <td><b>최대 프리미엄 할인 (Max Undervaluation)</b></td>
-                <td><span class="badge badge-green">{min_premium:+.2f}%</span></td>
-                <td>ADR이 본주 대비 역사적으로 가장 높은 할인(싸게) 거래되었던 시점입니다.</td>
-            </tr>
-            """
+            table_rows = (
+                f'<tr><td><b>평균 프리미엄 (Average Premium)</b></td><td><span class="badge badge-blue">{avg_premium:+.2f}%</span></td><td>조회 기간의 평균 괴리율입니다. 보통 장기적으로 0% 내외로 수렴합니다.</td></tr>'
+                f'<tr><td><b>프리미엄 표준편차 (Volatility of Premium)</b></td><td>{std_premium:.2f}%</td><td>괴리율이 평균 대비 변동한 범위입니다. 높을수록 아비트리지(차익) 거래 진입/청산 기회가 잦음을 의미합니다.</td></tr>'
+                f'<tr><td><b>최대 프리미엄 할증 (Max Overvaluation)</b></td><td><span class="badge badge-red">{max_premium:+.2f}%</span></td><td>ADR이 본주 대비 역사적으로 가장 높은 할증(비싸게) 거래되었던 시점입니다.</td></tr>'
+                f'<tr><td><b>최대 프리미엄 할인 (Max Undervaluation)</b></td><td><span class="badge badge-green">{min_premium:+.2f}%</span></td><td>ADR이 본주 대비 역사적으로 가장 높은 할인(싸게) 거래되었던 시점입니다.</td></tr>'
+            )
             
-            st.markdown(f"""
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th style="width:30%;">통계 지표</th>
-                        <th style="width:20%;">수치</th>
-                        <th>지표 설명</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {table_rows}
-                </tbody>
-            </table>
-            """, unsafe_allow_html=True)
+            html_table = (
+                f'<table class="data-table">'
+                f'<thead><tr><th style="width:30%;">통계 지표</th><th style="width:20%;">수치</th><th>지표 설명</th></tr></thead>'
+                f'<tbody>{table_rows}</tbody>'
+                f'</table>'
+            )
+            st.markdown(html_table, unsafe_allow_html=True)
 
     # --------------------------------------------------------------------------
     # 탭 2: 아비트리지 시뮬레이터
@@ -1102,42 +1061,28 @@ else:
                 """
                 
             badge_color = "badge-green" if net_profit > 0 else "badge-red"
-            st.markdown(f"""
-            <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.4rem; box-shadow: var(--shadow); margin-bottom:1rem;">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">추천 거래 차익 시나리오</div>
-                <div style="font-size:1.15rem; font-weight:800; color:var(--text); margin-top:2px; margin-bottom: 0.8rem;">
-                    {trade_direction}
-                </div>
-                
-                <table style="width:100%; font-size:0.85rem; border-collapse: collapse;">
-                    <tr style="border-bottom: 1px solid var(--border-subtle);">
-                        <td style="padding: 0.5rem 0; color:var(--text-muted);">총 투자금액 (Capital)</td>
-                        <td style="padding: 0.5rem 0; text-align:right; font-weight:600;">{capital_krw:,.0f} KRW</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border-subtle);">
-                        <td style="padding: 0.5rem 0; color:var(--text-muted);">합산 예상 거래비용 (Total Costs)</td>
-                        <td style="padding: 0.5rem 0; text-align:right; font-weight:600; color:var(--red);">{total_fees_krw:,.0f} KRW</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border-subtle);">
-                        <td style="padding: 0.5rem 0; color:var(--text-muted);">시장 가격 프리미엄 괴리율</td>
-                        <td style="padding: 0.5rem 0; text-align:right; font-weight:600; color:var(--accent);">{premium_pct:+.2f}%</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border-subtle);">
-                        <td style="padding: 0.5rem 0; color:var(--text-muted);"><b>제반비용 차감 후 예상 순수익</b></td>
-                        <td style="padding: 0.5rem 0; text-align:right; font-weight:700;"><span class="badge {badge_color}" style="font-size:0.85rem; padding: 3px 10px;">{net_profit:+,.0f} KRW</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 0.5rem 0; color:var(--text-muted);">수수료 차감 후 최종 수익률 (Net ROI)</td>
-                        <td style="padding: 0.5rem 0; text-align:right; font-weight:700; color: {'var(--green)' if roi > 0 else 'var(--red)'};">{roi:+.3f}%</td>
-                    </tr>
-                </table>
-            </div>
+            sim_table = (
+                f'<div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.4rem; box-shadow: var(--shadow); margin-bottom:1rem;">'
+                f'<div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">추천 거래 차익 시나리오</div>'
+                f'<div style="font-size:1.15rem; font-weight:800; color:var(--text); margin-top:2px; margin-bottom: 0.8rem;">{trade_direction}</div>'
+                f'<table style="width:100%; font-size:0.85rem; border-collapse: collapse;">'
+                f'<tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 0.5rem 0; color:var(--text-muted);">총 투자금액 (Capital)</td><td style="padding: 0.5rem 0; text-align:right; font-weight:600;">{capital_krw:,.0f} KRW</td></tr>'
+                f'<tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 0.5rem 0; color:var(--text-muted);">합산 예상 거래비용 (Total Costs)</td><td style="padding: 0.5rem 0; text-align:right; font-weight:600; color:var(--red);">{total_fees_krw:,.0f} KRW</td></tr>'
+                f'<tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 0.5rem 0; color:var(--text-muted);">시장 가격 프리미엄 괴리율</td><td style="padding: 0.5rem 0; text-align:right; font-weight:600; color:var(--accent);">{premium_pct:+.2f}%</td></tr>'
+                f'<tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 0.5rem 0; color:var(--text-muted);"><b>제반비용 차감 후 예상 순수익</b></td><td style="padding: 0.5rem 0; text-align:right; font-weight:700;"><span class="badge {badge_color}" style="font-size:0.85rem; padding: 3px 10px;">{net_profit:+,.0f} KRW</span></td></tr>'
+                f'<tr><td style="padding: 0.5rem 0; color:var(--text-muted);">수수료 차감 후 최종 수익률 (Net ROI)</td><td style="padding: 0.5rem 0; text-align:right; font-weight:700; color: {"var(--green)" if roi > 0 else "var(--red)"};">{roi:+.3f}%</td></tr>'
+                f'</table>'
+                f'</div>'
+            )
+            st.markdown(sim_table, unsafe_allow_html=True)
             
-            <div style="background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem;">
-                <div style="font-size:0.78rem; font-weight:600; color:var(--text); margin-bottom: 0.5rem; text-transform:uppercase;">프로세스 상세 진행 단계</div>
-                {steps_html}
-            </div>
-            """, unsafe_allow_html=True)
+            process_detail = (
+                f'<div style="background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem;">'
+                f'<div style="font-size:0.78rem; font-weight:600; color:var(--text); margin-bottom: 0.5rem; text-transform:uppercase;">프로세스 상세 진행 단계</div>'
+                f'{steps_html}'
+                f'</div>'
+            )
+            st.markdown(process_detail, unsafe_allow_html=True)
 
     # --------------------------------------------------------------------------
     # 탭 3: 차익거래 이론 및 가이드
