@@ -75,8 +75,8 @@ def inject_custom_css(is_dark):
         display: none !important;
     }}
     
-    /* 사이드바 접혔을 때 열기 버튼(stSidebarCollapsedControl)이 헤더를 숨겨도 항상 화면 좌상단에 뜨도록 스타일 교정 */
-    div[data-testid="stSidebarCollapsedControl"] {{
+    /* 사이드바 접혔을 때 열기 버튼이 항상 화면 좌상단에 뜨도록 스타일 교정 (st.secrets 에러 및 헤더 display:none 대응) */
+    div[data-testid="collapsedControl"], div[data-testid="stSidebarCollapsedControl"] {{
         display: flex !important;
         position: fixed !important;
         top: 12px !important;
@@ -89,7 +89,7 @@ def inject_custom_css(is_dark):
         padding: 4px !important;
     }}
     /* 열기 버튼 아이콘 색상 교정 */
-    div[data-testid="stSidebarCollapsedControl"] button {{
+    div[data-testid="collapsedControl"] button, div[data-testid="stSidebarCollapsedControl"] button {{
         color: var(--text) !important;
     }}
     
