@@ -72,31 +72,21 @@ def inject_custom_css(is_dark):
     /* Streamlit 기본 헤더 투명화 및 우측 툴바/푸터 숨기기 */
     header[data-testid="stHeader"] {{
         background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        height: 0px !important;
-        min-height: 0px !important;
     }}
     [data-testid="stToolbar"], [data-testid="stDecoration"], 
     [data-testid="stStatusWidget"], .stDeployButton, footer {{
         display: none !important;
     }}
     
-    /* 사이드바 접혔을 때 열기 버튼이 항상 화면 좌상단에 뜨도록 스타일 교정 (st.secrets 에러 및 헤더 display:none 대응) */
-    div[data-testid="collapsedControl"], div[data-testid="stSidebarCollapsedControl"] {{
-        display: flex !important;
-        position: fixed !important;
-        top: 12px !important;
-        left: 12px !important;
-        z-index: 999999 !important;
+    /* 사이드바 접혔을 때 열기 버튼(collapsedControl) 스타일 교정 */
+    div[data-testid="collapsedControl"] {{
         background-color: var(--card) !important;
         border: 1px solid var(--border) !important;
         border-radius: 8px !important;
         box-shadow: var(--shadow) !important;
-        padding: 4px !important;
+        padding: 2px !important;
     }}
-    /* 열기 버튼 아이콘 색상 교정 */
-    div[data-testid="collapsedControl"] button, div[data-testid="stSidebarCollapsedControl"] button {{
+    div[data-testid="collapsedControl"] button {{
         color: var(--text) !important;
     }}
     
