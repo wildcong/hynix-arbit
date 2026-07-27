@@ -79,7 +79,7 @@ def inject_custom_css(is_dark):
     }}
     
     /* 사이드바 접혔을 때 열기 버튼(collapsedControl) 스타일 및 강제 고정 위치 교정 */
-    div[data-testid="collapsedControl"], div[data-testid="stSidebarCollapsedControl"] {{
+    [data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"] {{
         display: flex !important;
         position: fixed !important;
         top: 12px !important;
@@ -91,7 +91,8 @@ def inject_custom_css(is_dark):
         box-shadow: var(--shadow) !important;
         padding: 4px !important;
     }}
-    div[data-testid="collapsedControl"] button, div[data-testid="stSidebarCollapsedControl"] button {{
+    [data-testid="collapsedControl"] button, [data-testid="stSidebarCollapsedControl"] button,
+    button[data-testid="stSidebarCollapsedControl"], button[data-testid="collapsedControl"] {{
         color: var(--text) !important;
     }}
     
